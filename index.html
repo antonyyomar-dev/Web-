@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cuadernito de repaso · Arquitectura de Negocio</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg1:#e6f5ff;--bg2:#d8e9ff;--card:#fff;--ink:#1f3350;--mut:#5d7392;--line:#d6e6f6;--acc:#3fa3ee;--acc2:#8a78ef;--soft:#eef7ff;--ex:#fff8e4;--exl:#f1d588;--key:#eaf3ff;--ok:#36b585;--shadow:0 6px 20px rgba(63,120,190,.13)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0f1b2d;--bg2:#15243c;--card:#1a2b45;--ink:#e6f0ff;--mut:#9db3cf;--line:#2b4162;--soft:#21354f;--ex:#39331f;--exl:#7b6b30;--key:#203858;--shadow:0 6px 20px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg1:#0f1b2d;--bg2:#15243c;--card:#1a2b45;--ink:#e6f0ff;--mut:#9db3cf;--line:#2b4162;--soft:#21354f;--ex:#39331f;--exl:#7b6b30;--key:#203858;--shadow:0 6px 20px rgba(0,0,0,.35)}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;background-color:var(--bg1)}
+.wrap{max-width:860px;margin:0 auto;padding:22px 14px 60px}
+header{text-align:center;margin-bottom:16px}
+.pill{display:inline-block;background:var(--card);color:var(--acc);font-weight:700;font-size:12px;letter-spacing:.08em;padding:6px 14px;border-radius:99px;box-shadow:var(--shadow);text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,44px);line-height:1.1;margin:14px 0 8px;background:linear-gradient(90deg,#3fa3ee,#8a78ef);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);max-width:560px;margin:0 auto 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{background:var(--card);border-radius:99px;padding:6px 12px;font-size:13px;box-shadow:var(--shadow)}
+.prog{background:var(--card);border-radius:18px;padding:12px 16px;box-shadow:var(--shadow);margin:16px 0 12px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.prog b{font-size:15px}.bar{flex:1 1 180px;height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3fa3ee,#8a78ef);border-radius:99px;transition:width .3s}
+.rst{border:0;background:var(--soft);color:var(--mut);border-radius:99px;padding:6px 12px;cursor:pointer;font-size:12px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:linear-gradient(var(--bg1) 70%,transparent)}
+.tab{flex:none;border:0;background:var(--card);color:var(--ink);padding:8px 14px;border-radius:99px;cursor:pointer;font-size:14px;box-shadow:var(--shadow);white-space:nowrap}
+.tab small{color:var(--mut);margin-left:4px}.tab.on{background:linear-gradient(90deg,#3fa3ee,#8a78ef);color:#fff}.tab.on small{color:#fff}
+.sec{display:none}.sec.on{display:block}
+.sbar{display:flex;gap:10px;align-items:center;margin:2px 4px 10px;font-size:13px;color:var(--mut)}
+.card{background:var(--card);border-radius:22px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow)}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.num{background:linear-gradient(135deg,#3fa3ee,#8a78ef);color:#fff;border-radius:12px;padding:4px 10px;font-weight:700;font-size:14px}
+.cn{font-weight:700;flex:1 1 160px}.cc{font-size:12px;color:var(--mut);background:var(--soft);border-radius:99px;padding:3px 10px}
+.ta{border:0;background:var(--soft);color:var(--acc);border-radius:99px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600}
+.row{border:1px solid var(--line);border-radius:14px;margin-top:8px;overflow:hidden}
+.rh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.em{font-size:20px}.rt{flex:1;font-weight:600}
+.row.done .rt{text-decoration:line-through;color:var(--mut)}.row.done{background:var(--soft)}
+.rh input{width:20px;height:20px;accent-color:var(--ok);cursor:pointer;flex:none}
+.ar{border:0;background:none;color:var(--mut);font-size:18px;cursor:pointer;transition:transform .2s;padding:0 4px}
+.row.open .ar{transform:rotate(180deg)}
+.rb{display:none;padding:2px 14px 14px;font-size:15px}.row.open .rb{display:block}
+.rb ul{margin:6px 0;padding-left:20px}.rb li{margin:3px 0}
+.key{background:var(--key);border-left:4px solid var(--acc);border-radius:10px;padding:8px 12px;margin:8px 0}
+.ex{background:var(--ex);border:1px dashed var(--exl);border-radius:12px;padding:8px 12px;margin:8px 0}
+.ex b{display:block;font-size:12px;margin-bottom:2px}
+.exam{font-size:13px;background:var(--soft);border-radius:10px;padding:6px 10px;margin:8px 0;color:var(--acc2);font-weight:600}
+.src{font-size:12px;color:var(--mut);margin-top:6px;font-style:italic}
+.tw{overflow-x:auto;margin:8px 0}table{border-collapse:collapse;font-size:13px;min-width:100%}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}th{background:var(--soft)}
+.gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.g{background:var(--card);border-radius:16px;padding:12px;box-shadow:var(--shadow);font-size:14px}
+.g b{display:block;color:var(--acc);margin-bottom:2px}
+footer{text-align:center;color:var(--mut);font-size:13px;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <span class="pill">Arquitectura de Negocio · 1ASI0704</span>
+ <h1>Cuadernito de repaso</h1>
+ <p class="sub">Un resumen ordenado de las semanas 1 a 5 para estudiar tu examen con calma: abre un tema, léelo, márcalo y sigue avanzando ✨</p>
+ <div class="chips"><span class="chip" id="c1"></span><span class="chip">🧭 Empieza por: Semana 1 → Canvas y estrategia</span><span class="chip">💙 Paso a paso llegas lejos, tú puedes</span></div>
+</header>
+<div class="prog"><b id="pt"></b><div class="bar"><i id="pb"></i></div><button class="rst" id="rst">↺ Reiniciar progreso</button></div>
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+<footer>Hecho con cariño para estudiar · tu avance se guarda en este navegador 💾</footer>
+</div>
+<script>
+const ul=a=>'<ul>'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+const ex=t=>'<div class="ex"><b>📌 Ejemplo del curso</b>'+t+'</div>';
+const ky=t=>'<div class="key">'+t+'</div>';
+const qx=t=>'<div class="exam">🎓 Posible examen: '+t+'</div>';
+const sr=t=>'<div class="src">'+t+'</div>';
+const tb=(h,r)=>'<div class="tw"><table><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+r.map(y=>'<tr>'+y.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('')+'</table></div>';
+
+const D=[
+{id:'s1',tab:'Semana 1',cards:[
+{n:'1.1',name:'Introducción a los negocios e integración empresarial',t:[
+['📋','Reglas del curso y evaluación',
+ ky('<b>Logro:</b> diseñar una Arquitectura de Negocio (procesos, personas y tecnología) como parte de una solución de arquitectura empresarial.')+
+ tb(['Evaluación','Peso','Semana','Recuperable'],[['PC 1','10%','4','Sí'],['Trabajo Parcial','10%','7','No'],['EA – Examen Parcial','20%','8','Sí'],['PC 2','10%','12','Sí'],['Trabajo Final','15%','15','No'],['Evaluación de Desempeño','15%','15','No'],['EB – Evaluación Final','20%','16','Sí']])+
+ ul(['<b>Unidad 1:</b> empresa y estrategias · <b>U2:</b> arquitectura de negocio, marcos y metodologías · <b>U3:</b> análisis de la empresa, problemas, madurez y fase Preliminar del ADM de TOGAF · <b>U4:</b> arquitecturas de aplicaciones, datos y tecnología con análisis de brechas.',
+ '<b>Empresa del trabajo:</b> una PYME con mínimo 3 años de operación, con acceso a info de negocio, procesos, aplicaciones, datos y tecnología (no piden info financiera ni de ventas).',
+ 'Grupos de máximo 5 con un líder; entrega digital (Word y PPT); presentaciones con vestimenta formal; debes evidenciar reuniones con stakeholders (fotos, correos, acuerdos).',
+ '<b>Plazos impostergables:</b> Parcial = domingo de la semana 6, 6 pm · Final = domingo de la semana 14, 6 pm. El Final debe desarrollar los Student Outcomes.'])],
+['🏢','Empresa y negocio',
+ ky('<b>Empresa:</b> entidad que funciona mediante un modelo de negocio, el cual es como el anteproyecto de su estrategia aplicada a estructuras, procesos y sistemas. Existe para atender uno o varios segmentos de mercado resolviendo problemas o necesidades.')+
+ ky('<b>Negocio / modelo de negocio:</b> describe cómo una organización <b>crea, entrega y capta valor</b>. Cubre 4 áreas: <b>clientes, oferta, infraestructura y viabilidad económica</b>. Hacer negocios es crear y captar valor, tenga o no ánimo de lucro.')+
+ qx('define empresa vs negocio y menciona las 4 áreas del modelo de negocio.')+sr('Osterwalder & Pigneur (2011)')],
+['👥','Roles frente a los modelos de negocio',
+ ul(['<b>Inversor:</b> busca y financia empresas con los modelos más competitivos.','<b>Consultor:</b> ayuda a cuestionar modelos actuales y diseñar otros nuevos y eficaces.','<b>Diseñador:</b> halla el modelo adecuado para lanzar productos innovadores.','<b>Emprendedor concienciado:</b> usa modelos innovadores para impulsar cambios sociales y económicos positivos.','Empresarios, ejecutivos y académicos deben comprender el impacto de la evolución de los modelos.'])],
+['🎯','Misión, visión, objetivos y estrategia',
+ tb(['Concepto','Idea clave'],[['Misión','Quién es la empresa, qué hace y a quién sirve (Fred). Identidad: «quiénes somos» (Collins y Porras).'],['Visión','Imagen idealista del futuro con éxito y madurez (Bratianu y Balanescu). Incluye un objetivo audaz <b>BHAG</b> y una descripción vívida del mañana.'],['Objetivos','Metas traducidas a elementos evaluables en costo, tiempo y desempeño (Baetz y Bart). El BHAG tiene horizonte de 10 a 30 años.'],['Estrategia','Posicionarse de forma rentable y sostenible frente a la competencia, creando valor superior al costo de crearlo (Porter, 1989).']])+
+ ex('<b>Educación:</b> Visión «Al 2030, ser la universidad referente en innovación de la región». Objetivos: +25% anual en artículos Scopus/WoS, 90% de empleabilidad en 6 meses, acreditación internacional de ingenierías en 3 años. Estrategia: diferenciación con Project Based Learning.<br><b>Banca digital:</b> Visión «plataforma financiera principal de la vida cotidiana». Objetivos: migrar 85% de transacciones de ventanilla a digital, bajar 15% el CAC, mantener morosidad (NPL) bajo el promedio. Estrategia: liderazgo en costos con IA y RPA.')+
+ qx('diferencia visión, misión y objetivos con un ejemplo.')],
+['🧩','Lienzo del modelo de negocio (Canvas): 9 bloques',
+ tb(['Bloque','Qué es'],[['Segmentos de mercado','Grupos de personas o entidades a los que apunta la empresa'],['Propuestas de valor','Productos y servicios que resuelven problemas de cada segmento'],['Canales','Cómo se comunica, distribuye y vende la propuesta'],['Relaciones con clientes','Vínculo que se mantiene con cada segmento'],['Fuentes de ingresos','Flujo de caja cuando el cliente adquiere la propuesta'],['Recursos clave','Activos físicos, intelectuales, humanos o económicos esenciales'],['Actividades clave','Acciones prioritarias para crear y entregar valor'],['Asociaciones clave','Proveedores y socios que optimizan el modelo y reducen riesgos'],['Estructura de costes','Todos los gastos de operar el modelo']])+
+ qx('listar los 9 bloques y explicar uno. Actividad en clase: armar un Canvas en grupos de máximo 3.')+sr('Osterwalder & Pigneur (2011), p. 44')],
+['🔗','Integración empresarial: qué es y características',
+ ky('<b>Definición:</b> proceso de optimizar procesos heredados y fragmentados (manuales y automáticos) en un entorno integrado, receptivo al cambio, que apoye la estrategia. No es solo una solución técnica: es un estado de la infraestructura que da acceso a información integrada (The Open Group).')+
+ ul(['<b>Interoperabilidad:</b> capacidad de compartir información y servicios, en varias dimensiones: <b>operativa/negocio</b> (cómo colaboran los procesos), <b>información</b> (cómo se comparten datos) y <b>técnica</b> (conexión física y lógica).',
+ '<b>EAI (Integración de Aplicaciones Empresariales):</b> evita duplicar funciones; por ejemplo, un solo servicio de cambio de dirección que usan todas las aplicaciones vía flujos de trabajo.',
+ '<b>Niveles de abstracción:</b> Presentación (portales con apariencia común) → Información (ontología común) → Técnica (métodos compartidos de comunicación y almacenamiento).',
+ '<b>Datos maestros (C-MDM):</b> crea un «registro dorado», punto único de verdad que elimina silos y da consistencia semántica.'])],
+['⚙️','Integración: de qué depende, para qué sirve y tipos',
+ ul(['<b>Depende de:</b> el <b>modelo operativo</b> (nivel de integración y estandarización de procesos; es el determinante fundamental), la <b>gobernanza de arquitectura</b> (registrar, validar y auditar artefactos), <b>estándares SMART</b> y la <b>gestión de la coexistencia</b> de sistemas legados con nuevos mediante wrappers/interfaces.',
+ '<b>Perspectiva de negocio:</b> mayor ROI y menos riesgo; soporta interacciones B2B, B2C y B2B2C; da agilidad estratégica; simplifica el abastecimiento (procurement).',
+ '<b>Perspectiva de TI:</b> maneja la complejidad (evita islas de datos), reduce costos operativos al compartir componentes, asegura consistencia con un vocabulario común.'])+
+ tb(['Tipo','Cuándo ocurre el intercambio'],[['Síncrona','En el momento en que se hace el requerimiento'],['Asíncrona','Cuando ocurre un evento posterior al requerimiento']])+
+ qx('diferencia integración síncrona vs asíncrona.')]
+]},
+{n:'1.2',name:'Estrategias y transformación digital',t:[
+['🧭','¿Qué es una estrategia de negocio?',
+ ky('Conjunto de planes integrales para alcanzar objetivos a largo plazo y, sobre todo, una <b>ventaja competitiva sostenible</b> (Perera et al., 2025).')+
+ ul(['<b>Dirección ideológica:</b> visión (hacia dónde vamos), misión (quiénes somos hoy) y valores (nuestra ética).','<b>Análisis del entorno:</b> FODA (fortalezas, oportunidades, debilidades, amenazas) o PESTEL.','<b>Ciclo de gestión:</b> formulación, asignación de recursos, implementación y evaluación continua.'])+
+ sr('Actividad grupal en clase: analizar la UPC (dirección ideológica + FODA/PESTEL).')],
+['🥇','Estrategias genéricas de Porter y tipologías de Miles y Snow',
+ tb(['Porter','Idea'],[['Liderazgo en costos','Ser el productor más barato'],['Diferenciación','Ofrecer algo único por lo que pagan más'],['Enfoque','Especializarse en un nicho específico']])+
+ tb(['Miles y Snow','Comportamiento ante la innovación'],[['Prospectoras','Buscan innovar siempre'],['Analizadoras','Siguen a los líderes con cautela'],['Defensoras','Protegen su mercado actual'],['Reactoras','Solo cambian cuando se ven obligadas']])+
+ qx('nombra las 3 estrategias genéricas y las 4 tipologías.')],
+['🌍','Globalización, sectores y entornos VUCA',
+ ul(['<b>Estandarización vs adaptación:</b> vender igual en todo el mundo ahorra costos (economías de escala); adaptar al país/cultura/leyes mejora el encaje (ej. sabores en alimentos). En tecnología se combina <b>orientación al mercado</b> con <b>orientación emprendedora</b>.',
+ '<b>«Una sola talla no sirve»:</b> Banca → gestión operativa y marketing de marca. Manufactura → innovación y <b>capacidades dinámicas</b> (reconfigurar recursos rápido). PYMES → flexibilidad estratégica.',
+ '<b>VUCA:</b> entornos Volátiles, Inciertos, Complejos y Ambiguos. Tendencias: <b>transformación dual</b> (digitalización + sostenibilidad), IA para decisiones predictivas y la <b>7C Strategy Wheel</b> (más flexible que FODA, 59 métodos a elegir).'])],
+['💻','Transformación digital: definición, caso y 4 pilares',
+ ky('<b>TD:</b> integración integral de tecnologías digitales en todos los ámbitos de la empresa. No es solo «comprar software»: es un cambio cultural y estratégico que modifica cómo opera y entrega valor (repensar modelos, procesos y experiencia del usuario).')+
+ ex('<b>Caso consultora de RRHH:</b> 1) empresa consultora analógica → 2) decide cambiar (se transforma) → 3) ejecuta la TD digitalizando servicios y procesos → 4) es una empresa digital.')+
+ tb(['Pilar','Contenido'],[['Tecnología','IA, Big Data, IoT, nube, blockchain'],['Procesos','Rediseño y automatización interna y externa'],['Cultura','Mentalidad ágil y abierta al cambio; sin ella la tecnología falla'],['Estrategia','Alinear la visión digital con los objetivos del negocio']])+
+ qx('los 4 pilares de la TD y por qué la cultura es crítica.')],
+['🔬','Marcos teóricos, sectores y tamaño de empresa',
+ ul(['<b>Modelo TOE:</b> factores Tecnológicos, de la Organización y del Entorno que influyen en la adopción digital.','<b>Sistemas complejos:</b> la TD evoluciona con interacciones impredecibles entre tecnología, personas y entorno.','<b>Canvas de TD:</b> herramienta práctica para visualizar roles, competencias y habilitadores.'])+
+ tb(['Sector','Aplicación'],[['Manufactura (Industria 4.0)','Mantenimiento predictivo con IA y gemelos digitales'],['Retail','Personalización masiva con marketing digital y análisis de comportamiento'],['Agricultura','Sensores IoT de humedad y drones'],['Logística','Cadena de suministro con rastreo en tiempo real']])+
+ ul(['<b>Grandes:</b> mucho capital pero cultura burocrática lenta. <b>PYMEs:</b> ágiles y cercanas al cliente pero con poco presupuesto y personal TI; en la pandemia sobrevivieron muchas gracias a canales digitales y teletrabajo.'])],
+['📈','Beneficios, retos y futuro de la TD',
+ ul(['<b>Eficiencia y rentabilidad:</b> menos costos, más productividad.','<b>Experiencia del cliente:</b> lealtad mediante <b>omnicanalidad</b> (integrar lo físico y lo digital).','<b>Sostenibilidad:</b> innovación verde y economía circular.','<b>Reto principal:</b> resistencia de empleados por miedo o falta de habilidades → programas de <b>upskilling</b>.','Futuro: estandarizar KPIs y estudiar la TD en mercados emergentes y a largo plazo.'])],
+['🚀','Tecnologías emergentes en la Arquitectura Empresarial',
+ ky('Innovaciones digitales en adopción masiva que pueden transformar modelos de negocio, procesos y arquitecturas, haciéndolas más ágiles, escalables, resilientes y centradas en el cliente (van de Wetering et al., 2021).')+
+ tb(['Tecnología','Aporte / rol de la AE'],[['IA','Automatiza decisiones, predice comportamientos y optimiza procesos'],['Microservicios','Arquitecturas modulares y escalables; facilitan DevOps, CI/CD'],['Cloud (AWS, Azure, GCP)','Infraestructura flexible y de bajo costo; la AE define qué servicios se alinean a la estrategia'],['Blockchain','Trazabilidad, seguridad y descentralización; contratos inteligentes'],['IoT','Conecta dispositivos físicos con sistemas digitales; la AE modela sensores, redes y plataformas'],['5G y Edge Computing','Arquitecturas distribuidas de baja latencia, para tiempo real']])]
+]}]},
+
+{id:'s2',tab:'Semana 2',cards:[
+{n:'2.1',name:'Análisis y diagnóstico de negocio',t:[
+['🌎','PESTEL: qué es y para qué sirve',
+ ky('Herramienta de exploración del <b>macroentorno</b> para evaluar sistemáticamente factores externos. Acrónimo: <b>P</b>olítico, <b>E</b>conómico, <b>S</b>ocial, <b>T</b>ecnológico, <b>E</b>cológico/Ambiental y <b>L</b>egal.')+
+ ul(['Permite detectar <b>oportunidades y amenazas</b>, evaluar riesgos y apoyar la planificación a largo plazo (útil al entrar a nuevos mercados o entornos regulatorios complejos).','Implicancias: adaptarse a la globalización y cambios sociales; anticipar cambios regulatorios y alinear con estándares ambientales/legales; funciona mejor integrado con <b>FODA</b> y las <b>5 Fuerzas de Porter</b>.','Variante <b>PESTEL+I</b> (bioeconomía): agrega Infraestructura (logística, conectividad digital).'])+
+ qx('significado de cada letra de PESTEL.')+sr('Münter (2025); George (2025); Blümel et al. (2023)')],
+['🔎','PESTEL: cómo se hace, interpreta y aplica',
+ ul(['<b>Requisitos:</b> datos de calidad, definir dimensiones relevantes según el sector y expertos con múltiples perspectivas.','<b>Proceso:</b> 1) <b>Escaneo</b> de eventos/tendencias en las 6 dimensiones, 2) <b>Ponderación</b> (por ejemplo con AHP, Proceso de Jerarquía Analítica), 3) <b>Interpretación</b> como mapa de señales, considerando que las dimensiones se solapan, 4) <b>Gestión de incertidumbre</b> (análisis neutrosófico, lógica difusa).'])+
+ ex('Agricultura inteligente: subsidios (Político) + consumo orgánico (Social) + sensores IoT (Tecnológico). IA: hacktivismo y retos éticos/regulatorios. Bioeconomía: infraestructura digital que habilita blockchain y transparencia en residuos.')],
+['⚔️','Las 5 Fuerzas de Porter',
+ ky('Marco para entender la <b>intensidad de la competencia y la rentabilidad potencial</b> de una industria, mirando más allá de los rivales directos.')+
+ tb(['Fuerza','Idea clave'],[['Amenaza de nuevos entrantes','Qué tan fácil es entrar. Barreras: economías de escala, regulación estricta, alta inversión inicial'],['Poder de proveedores','Imponen precios o menor calidad; crítico si son pocos o el insumo no es sustituible'],['Poder de compradores','Exigen precios bajos si tienen muchas opciones o el producto es poco diferenciado'],['Amenaza de sustitutos','Producto de otra categoría que cumple la misma función (tren vs avión)'],['Rivalidad entre competidores','Fuerza central; intensa si hay muchos rivales similares o sin diferenciación (guerra de precios)']])+
+ qx('nombrar las 5 fuerzas y dar un ejemplo de barrera de entrada. Actividad: analizar las fuerzas de la UPC.')],
+['⛓️','Cadena de valor física vs virtual',
+ sr('Concepto formulado por Michael Porter en 1985.')+
+ tb(['','Física (tradicional)','Virtual'],[['Actividades','Tangibles: producción, logística, entrega','Intangibles, mediadas por información'],['Valor viene de','Transformar insumos físicos','Procesar datos y generar conocimiento'],['Enfoque','Eficiencia operativa e inventarios','Visibilidad de información, personalización e innovación'],['Flexibilidad','Limitada por activos físicos','Alta, reconfiguración dinámica']])+
+ ul(['La teoría pasó de un modelo lineal a un <b>sistema complejo</b> que incluye sostenibilidad y cultura (ej. <b>Triple Value Leadership</b>: beneficio para negocio, sociedad y ambiente).','La competitividad moderna viene de <b>integrar</b> ambas con IA, IoT, cloud y plataformas B2B.'])+
+ ex('<b>Wal-Mart:</b> cadena virtual en 3 etapas: visibilidad de datos → «espejeo» (replicar procesos físicos en digital) → nuevas relaciones con clientes basadas en la información. Dio resiliencia en el COVID-19.')],
+['🗺️','Mapa de procesos (BPM)',
+ ky('Práctica fundacional de la <b>Gestión de Procesos de Negocio (BPM)</b>: representación visual y holística de las operaciones y sus interrelaciones. Describe cómo <b>entradas (inputs) se transforman en salidas (outputs)</b> y cómo se crea y entrega valor entre departamentos.')+
+ ul(['No es solo un diagrama: sirve para entender, analizar y mejorar el negocio, alineando la operación diaria con la estrategia.'])],
+['📊','Desempeño empresarial, stakeholders y KPIs',
+ ul(['<b>Concepto moderno:</b> multidimensional y dependiente del contexto; ya no es solo «cuánto gana». Mide dimensiones <b>financieras y operativas</b>, <b>sociales y ambientales</b>, y <b>subjetivas/intangibles</b> (reputación, cultura, satisfacción).','<b>Stakeholders:</b> empleados, clientes, accionistas y comunidad; el contexto cultural condiciona cómo se interpretan los resultados.'])+
+ tb(['KPI','Descripción','Ejemplo'],[['Rezagado (lagging)','Mide desempeño pasado, retrospectivo','Ingresos del trimestre anterior'],['Líder (leading)','Predictivo, anticipa resultados','Capacitación de empleados, satisfacción actual del cliente']])+
+ ul(['<b>Marcos de control:</b> Balanced Scorecard (alinea actividades con la visión), Sustainability BSC (criterios ESG) y dashboards/BI (monitoreo en tiempo real).','<b>PYMEs:</b> los modelos de multinacionales suelen fallar; necesitan marcos adaptados, dashboards simples y apoyo del liderazgo. La nube democratiza la analítica.','<b>TD e IA:</b> analizan datos no estructurados, pero la fragmentación de sistemas sigue siendo un reto.'])+
+ qx('lagging vs leading con ejemplo.')]
+]},
+{n:'2.2',name:'Patrones de modelos de negocio',t:[
+['✂️','Desagregación',
+ ky('Una empresa realiza 3 actividades distintas: <b>relaciones con clientes, innovación de productos e infraestructura</b>. Cada una tiene imperativos económicos, competitivos y culturales diferentes, y al convivir pueden generar conflictos. Por eso se «desagrega» en entidades independientes.')+
+ ex('Banca privada (asesoría / productos financieros / operaciones). Telecom móvil: <b>Bharti Airtel</b> subcontrató su red a <b>Ericsson</b> y su infraestructura TI a <b>IBM</b> para enfocarse en relaciones con clientes.')+sr('Osterwalder & Pigneur (2011), p. 62-63')],
+['🐉','La larga cola (Long Tail)',
+ ky('Principio: <b>vender menos de más</b>. Catálogo enorme de productos de nicho que individualmente venden poco, pero juntos generan ingresos significativos. Requiere costes de inventario bajos y plataformas potentes de acceso.')+
+ ex('<b>LEGO Factory</b> (diseñas y compras tu propio kit), <b>Lulu.com</b> (autoedición para audiencias pequeñas), <b>Netflix</b> (catálogo inmenso de títulos de nicho).')+sr('Osterwalder & Pigneur (2011), p. 70-75')],
+['🔄','Plataformas multilaterales',
+ ky('Reúnen <b>2 o más grupos de clientes distintos pero interdependientes</b>. La plataforma solo vale si todos los grupos están presentes; actúa como intermediaria. Suele <b>subvencionar un lado</b> con oferta gratuita para atraer masa.')+
+ ex('<b>Google:</b> usuarios (buscan gratis), creadores de contenido y anunciantes (pagan). <b>Visa:</b> comercios, titulares de tarjeta y bancos.')+sr('Osterwalder & Pigneur (2011), p. 81-87')],
+['📣','Gratis con publicidad',
+ ky('Al menos un segmento recibe de forma continua una oferta gratuita; otra parte del negocio la financia. El sub-patrón de <b>publicidad</b> es una plataforma multilateral donde los anunciantes pagan el contenido gratuito.')+
+ ex('Periódico gratuito <b>Metro</b> y anuncios de <b>Google</b>.')],
+['🎁','Freemium',
+ ky('Servicios básicos gratis para una gran base de usuarios; una pequeña parte (<b>habitualmente menos del 10%</b>) paga por servicios premium opcionales y así <b>subvenciona</b> a los demás.')+
+ ex('<b>Skype</b> (llamadas gratis entre computadoras, cobra llamadas a fijos), <b>ChatGPT</b> (cuentas gratis y de pago), <b>Red Hat</b>.')+
+ qx('diferencia gratis con publicidad vs freemium: ¿quién paga en cada uno?')],
+['🪝','Cebo y anzuelo',
+ ky('Oferta inicial atractiva, gratuita o muy barata (<b>cebo</b>) que ata al cliente a compras repetidas de productos/servicios relacionados (<b>anzuelo</b>). La empresa recupera la inversión con los altos márgenes de recambios o servicios recurrentes.')+
+ ex('<b>Gillette:</b> mango barato, ganancia en los cartuchos desechables. Telefonía móvil: teléfono casi regalado a cambio de contrato de permanencia con cuotas mensuales.')],
+['🔓','Modelos de negocio abiertos',
+ ky('Apertura sistemática de la <b>I+D</b> a terceros: en un mundo de conocimiento distribuido se crea más valor colaborando. Puede ser <b>de fuera adentro</b> (importar ideas) o <b>de dentro afuera</b> (vender activos intelectuales sin uso).')+
+ ex('<b>P&G Connect + Develop</b> busca innovaciones fuera de sus laboratorios. <b>InnoCentive</b> conecta empresas con problemas científicos («seekers») y científicos que dan soluciones por premios («solvers»).')+
+ sr('Ejercicio grupal de cada patrón: proponer 2 ejemplos propios.')]
+]}]},
+
+{id:'s3',tab:'Semana 3',cards:[
+{n:'3.1',name:'Metodologías para analizar problemas',t:[
+['🧠','Introducción y metodologías blandas',
+ ky('Analizar y resolver problemas es el núcleo de la administración moderna: identificar, estructurar y resolver desafíos complejos con <b>agilidad</b>. No basta la intuición: se necesitan métodos científicos y tecnológicos.')+
+ ul(['Las <b>metodologías blandas</b> (SSM y CSP) sirven cuando el problema no está claro y hay muchas personas con puntos de vista distintos; ayudan a negociar y aprender en conjunto.'])],
+['🌫️','SSM – Soft Systems Methodology (Checkland)',
+ ky('Parte de que los sistemas sociales son «blandos»: sin objetivos claros ni soluciones técnicas únicas. Se enfoca en <b>aprendizaje y consenso</b>, no en la solución óptima, sino en cambios <b>sistémicamente deseables y culturalmente factibles</b>.')+
+ ul(['<b>Situación problema no estructurada:</b> hay inquietud pero no se sabe qué falla.','<b>Cuadros ricos (Rich Pictures):</b> dibujos que capturan estructura, procesos, conflictos y relaciones de poder.','<b>Definiciones raíz (6 elementos):</b> <b>C</b>lientes, <b>A</b>ctores, <b>T</b>ransformación, <b>W</b>eltanschauung (visión del mundo), <b>O</b>wners/Dueños, <b>E</b>ntorno (CATWOE).','Ciclo: del mundo real → modelo conceptual sistémico → regreso al mundo real para comparar y debatir.'])+
+ qx('los 6 elementos de la definición raíz (CATWOE).')],
+['⚖️','CSP – Critical Systems Practice (Jackson) y comparativa',
+ ky('Responde a las limitaciones de metodologías que ignoran las <b>asimetrías de poder</b>. Pensamiento sistémico crítico: cuestiona quién define el sistema y quién queda excluido. Usa una «meta metodología» (<b>TSI, Total Systems Intervention</b>): duro si el problema es técnico, SSM si es de entendimiento, métodos críticos si hay coerción.')+
+ ul(['Clasifica según <b>complejidad</b> (simple/complejo) y <b>relación entre participantes</b>: <b>unitario</b> (mismos objetivos), <b>pluralista</b> (valores distintos pero con voluntad de compromiso), <b>coercitivo</b> (conflicto de poder).'])+
+ tb(['Atributo','SSM','CSP'],[['Enfoque','Aprendizaje y debate sobre el propósito','Elección de metodología y manejo del poder'],['Postura filosófica','Interpretativismo (subjetivo)','Realismo crítico (objetivo)'],['Poder','Asume que el debate resuelve conflictos','Expone y desafía las estructuras de poder'],['Resultado','Acción para mejorar la situación','Intervención integral y justa']])],
+['🏗️','Perspectiva profesional, IA y valores',
+ ul(['<b>En AE/TOGAF:</b> SSM es muy útil en las fases tempranas (Fase A, visión; y Fase B, arquitectura de negocio) cuando los stakeholders tienen visiones encontradas. CSP funciona como herramienta de gobernanza: detecta proyectos que fallan porque se ignora o coacciona a grupos de interés.','<b>IA y visualización:</b> procesa grandes volúmenes de datos cualitativos (entrevistas, textos) y encuentra patrones, para decidir con evidencia.','<b>VFT (Value-Focused Thinking):</b> entender primero los valores de los stakeholders; combinado con SSM asegura soluciones aceptadas.'])],
+['🚧','Limitaciones y transformación digital',
+ ul(['<b>Factor humano:</b> la CSP a veces no explica cómo manejar cultura y resistencia al cambio.','<b>Ética digital:</b> herramientas como el eye tracking plantean retos de privacidad y consentimiento.','Brecha entre la investigación universitaria y lo que necesita la empresa; muchos modelos se centran en eficiencia y olvidan la experiencia del cliente o la <b>ciberseguridad</b>.','<b>Transformación digital:</b> cambio estratégico, no solo comprar computadoras. PYMEs necesitan roadmap y gobernanza; el éxito exige <b>liderazgo empático</b>; hay paradojas (¿ágil o planificar? ¿estandarizar o personalizar?).'])]
+]},
+{n:'3.2',name:'Gestión de problemas de negocio',t:[
+['📘','Definición y marcos teóricos',
+ ky('Enfoque sistemático para identificar, analizar y resolver desafíos complejos; puente entre modelos teóricos y soluciones prácticas, que da resiliencia y desempeño sostenido. Integra administración tradicional con enfoques ágiles y de sistemas.')+
+ ul(['<b>Tríada de gestión:</b> 3 niveles: formulación de políticas, coordinación e implementación (Littauer et al., 1976).','<b>TRFM (Flujo de Relaciones Totales):</b> teoría general de sistemas; modela la empresa como flujos de información, materia, energía y fondos; decisiones científicas incluyendo a los stakeholders.','<b>Entornos ágiles:</b> organizaciones menos jerárquicas, en red, con gestión de eventos en tiempo real.'])],
+['🧰','Herramientas: MCDM, TRIZ, Six Sigma, Monte Carlo',
+ tb(['Herramienta','Para qué sirve'],[['MCDM (decisión multicriterio)','Manejar grandes volúmenes de datos con BI y machine learning para decisiones robustas'],['TRIZ','Resolver contradicciones; nació técnica y hoy se usa en marketing, proyectos e innovación'],['Six Sigma','Mejora de calidad; usa Ishikawa, los 5 Porqués y Pareto para hallar la causa raíz'],['Simulación Monte Carlo','Modelar riesgo e incertidumbre y anticipar escenarios antes de invertir']])],
+['🔀','Problema de negocio vs problema de tecnología',
+ ky('<b>Problema de negocio:</b> brecha o ineficiencia en las operaciones que afecta el logro de objetivos estratégicos (rentabilidad, cuota de mercado, satisfacción, productividad). Es sistémico y transversal. Base: Gestión Estratégica; TOGAF Arquitectura de Negocio analiza estructura, gobernanza y procesos antes de pensar en tecnología.')+
+ ky('<b>Problema de tecnología:</b> deficiencia en sistemas, hardware o software que impide operar con eficiencia (Laudon & Laudon). Suele ser síntoma de mala alineación con el negocio. Base: <b>Teoría de la Contingencia</b> (no hay una forma óptima única de organizar).')+
+ ex('<b>Negocio:</b> minorista con baja satisfacción y muchas devoluciones; causa: inventario no actualizado en tiempo real, se prometen productos sin stock. Solución: rediseñar el proceso de gestión de inventario integrado con ventas.<br><b>Tecnología:</b> sistema de inventario lento que se cae; causa: BD sin optimizar, servidor sobrecargado, arquitectura monolítica. Solución: optimizar BD, migrar a microservicios en la nube y mejorar el servidor.')+
+ qx('clasificar un caso como problema de negocio o de tecnología y justificar.')],
+['❓','Método 5W2H',
+ ky('Estructura un problema respondiendo 7 preguntas:')+
+ ul(['<b>What</b> – ¿qué es el problema?','<b>Why</b> – ¿por qué es un problema?','<b>How many</b> – ¿cuántos defectos encontramos?','<b>When</b> – ¿cuándo lo observamos?','<b>How</b> – ¿cómo lo observamos?','<b>Where</b> – ¿dónde lo observamos?','<b>Who</b> – ¿quién(es) es(son) afectado(s)?'])],
+['🚨','ITIL: incidente vs problema',
+ ul(['<b>Según el PPT, incidente:</b> evento que se presenta recurrentemente en un período conocido. Ej.: cada fin de mes el sistema contable demora en el cierre mensual.','<b>Según el PPT, problema:</b> todo lo que se vuelve objeto de reflexión y se percibe necesario conocer, analizar y solucionar. Ej.: demora en el procesamiento del cierre mensual.'])+
+ '<div class="exam">⚠️ Ojo: en ITIL oficial, un incidente es una interrupción no planificada del servicio y un problema es la causa raíz de uno o más incidentes. Para el examen usa la definición de tu profesor/PPT y ten esta idea a mano.</div>'],
+['🐟','Diagrama de Ishikawa (espina de pescado)',
+ ky('Herramienta visual de <b>causa y efecto</b> para identificar y organizar todas las causas posibles de un problema y llegar a la <b>causa raíz</b>. Se basa en la Gestión de la Calidad Total (TQM). La «cabeza» es el efecto; las «espinas» son categorías de causas.')+
+ ul(['<b>6M:</b> Mano de obra, Métodos, Máquinas (maquinaria), Materiales, Mediciones, Medio ambiente.','En AE se pueden adaptar a los dominios: Negocio, Datos, Aplicaciones, Tecnología.','Promueve el pensamiento sistémico y la lluvia de ideas sin descartar causas.'])+
+ ex('Efecto: «alta contaminación bacteriana en la línea de cárnicos». Mano de obra: ¿falta capacitación? Métodos: ¿saneamiento defectuoso? Máquinas: ¿refrigeración falla? Materiales: ¿materia prima o agua contaminada? Mediciones: ¿termómetros sin calibrar? Medio ambiente: ¿humedad/temperatura inadecuadas?')+
+ qx('dibujar un Ishikawa con las 6M para un problema dado.')],
+['🌱','Factores críticos: cultura, cambio y tamaño de empresa',
+ ul(['<b>Cultura organizacional</b> (de grupo, de mercado o jerárquica): determina si la iniciativa sobrevive; las culturas orientadas a procesos y aprendizaje son más maduras.','<b>Resistencia al cambio:</b> por falta de comunicación, desconfianza y poco compromiso de la alta dirección.','<b>Comunicación del liderazgo:</b> clara, empática y transparente para generar confianza.','<b>PYMEs:</b> ágiles e intuitivas, pero a veces sin procesos para evaluar decisiones. <b>Multinacionales:</b> ordenadas y estructuradas, pero con burocracia que frena la innovación radical.'])]
+]}]},
+
+{id:'s4',tab:'Semana 4',cards:[
+{n:'4.1',name:'Modelamiento ArchiMate – capa de negocio',t:[
+['🧱','Elementos básicos y cómo leer un enunciado',
+ '<div class="exam">ℹ️ Los diagramas solución del PPT son imágenes. Aquí resumo la lógica con nomenclatura estándar de ArchiMate; compara con tus diapositivas para el estilo exacto.</div>'+
+ tb(['En el enunciado aparece...','Elemento de negocio'],[['«proceso de venta», «Gestión de problemas»','Proceso de negocio'],['«analista de compras», «cajero Market»','Rol de negocio (se asigna al proceso)'],['«Producto», «tanque de combustible»','Producto'],['«repositorio», «base de datos», «Petición del Pasajero»','Objeto de negocio / datos'],['«solicitud de suscripción», «ocurre el evento»','Evento de negocio'],['«servicio de suscripción», «Atención al Usuario»','Servicio de negocio'],['«mesa de ayuda», «página web»','Canal / interfaz de negocio'],['«función de RRHH», «Arquitectura de TI»','Función de negocio'],['«cliente persona», «tipos de clientes»','Actor / rol (cliente)']])],
+['🔀','Verbos y su relación',
+ tb(['Verbo del enunciado','Relación'],[['activa / dispara / inicia','<b>Disparo</b> (triggering) entre procesos o desde un evento'],['está asignado a','<b>Asignación</b> entre rol y proceso'],['soporta / atiende / entrega','<b>Servicio</b> (serving) o realización'],['consulta / lee','<b>Acceso</b> (lectura) al objeto de datos'],['registra / actualiza','<b>Acceso</b> (escritura / lectura-escritura)'],['está compuesto por','<b>Composición</b> (todo-partes)'],['puede activar A o B','Disparo con <b>unión OR</b>']])+
+ ky('<b>Método sugerido:</b> 1) subraya los sustantivos y clasifícalos, 2) subraya los verbos y conviértelos en relaciones, 3) dibuja primero el flujo de procesos, 4) agrega roles, datos y servicios, 5) revisa que no sobre ni falte ningún elemento del enunciado.')],
+['📝','Ejemplos resueltos 1 a 9',
+ tb(['#','Qué hay que modelar'],[['1','Venta activa Producción y Almacenamiento'],['2','Compras (asignado: analista de compras) activa Compras nacionales (asignado: asistente de compras)'],['3','Almacenamiento activa Control de calidad; este puede activar Toma de muestra (analista de calidad) o Recepción (operario de almacén)'],['4','Evento en avión: pasajero llama a la tripulante → Atención al pasajero (tripulante) registra en repositorio «Petición del Pasajero» → el Supervisor lo consulta y activa el Servicio al pasajero, que entrega el producto'],['5','Market: cliente persona genera solicitud de tanque de combustible → proceso de Venta (Cajero consulta cliente y registra venta con cliente, producto y comprobante) → según ubicación activa distribución aérea o terrestre'],['6','Página web que atiende al cliente y soporta el servicio de suscripción, que activa la venta por suscripción (mensual o anual) y confirma el registro'],['7','Función de RRHH con 5 procesos: Selección de Personal (consulta BD de candidatos, activa Contratar y Alta), Gestión de Planillas, Evaluación de Desempeño y Baja'],['8','Incidente notifica al analista TI Nivel 1 y al usuario; el usuario reporta por la mesa de ayuda, que soporta Atención al Usuario; el analista activa Gestión de incidentes'],['9','Área de TI con 3 funciones (Desarrollo de Soluciones, Producción y Operaciones, Arquitectura de TI) atendidas por 4 procesos (Problemas, Incidentes, Configuración de Infraestructura, Abastecimiento de TI)']])],
+['🏋️','Ejercicios de práctica 1 a 10',
+ tb(['#','Enunciado resumido','Idea a practicar'],[['1','Smartphone compuesto por pantalla, batería, procesador, RAM, cámara, otros','Composición'],['2','El mismo smartphone más un audífono inalámbrico','Composición + elemento adicional'],['3','Operario asignado al proceso de ensamblaje','Asignación'],['4','Diseño → Producción → Control de calidad → Distribución','Cadena de disparos'],['5','Gestión de RRHH consulta y actualiza «Datos de Empleados»','Acceso lectura-escritura'],['6','Recepción de pedidos activa Planificación de rutas y Asignación de vehículos','Un disparo a dos procesos'],['7','Clínica: Admisión (recepcionista) activa Registro de historia clínica (asistente médico)','Disparo + asignaciones'],['8','Universidad: estudiante solicita inscripción → Validación de requisitos (coordinador) consulta historial','Evento + acceso'],['9','Producción → Empaquetado → Inspección final (supervisor de calidad) o Despacho (coordinador logístico)','Disparo con OR'],['10','Hospital: paciente llama a enfermera → Atención al paciente → registra «Solicitud del Paciente» → médico de guardia consulta y activa servicio de atención médica','Igual que el ejemplo 4']])+
+ qx('PC 1 es en la semana 4, así que esta semana es de práctica con enunciados.')]
+]}]},
+
+{id:'s5',tab:'Semana 5',cards:[
+{n:'5.1',name:'Mapa de capacidades empresariales',t:[
+['🗂️','Capacidades y su relación con la AE',
+ ky('Una <b>capacidad empresarial</b> es lo que la organización es capaz de hacer; se ve como un mapa por áreas. En AE permite:')+
+ ul(['Diagnosticar el estado actual (<b>AS-IS</b>) y diseñar el futuro (<b>TO-BE</b>) alineado con la estrategia.','Identificar <b>brechas</b> entre capacidades actuales y requeridas.','Priorizar inversiones en tecnología, procesos y talento; integrar negocio, aplicaciones, datos y tecnología.'])+
+ ex('Capacidad «Gestión de Clientes»: procesos de atención al cliente, aplicación CRM, datos de historial de compras y tecnología de IA para análisis predictivo.')],
+['🏪','Tipos de capacidades en el mapa',
+ tb(['Zona','Qué agrupa'],[['Front Office','Capacidades que interactúan directamente con el cliente'],['Middle','Capacidades de TI que permiten la integración empresarial, interna o con el entorno'],['Back Office – Core','Capacidades propias del giro de negocio (core business)'],['Back Office – Soporte','Capacidades de apoyo al giro de negocio']])+sr('Open Group Guide – Business Capabilities')]
+]},
+{n:'5.2',name:'Gestión de indicadores de desempeño',t:[
+['📏','Medir vs evaluar',
+ tb(['Aspecto','Medir','Evaluar'],[['Propósito','Cuantificar','Valorar'],['Naturaleza','Objetiva','Interpretativa'],['Herramientas','Indicadores, métricas','Criterios, estándares'],['Resultado','Datos','Juicio o diagnóstico'],['Ejemplo','Tiempo de respuesta','Nivel de satisfacción del cliente']])+
+ ex('Medir: el tiempo promedio de atención o la estatura de un niño. Evaluar: si ese tiempo cumple el estándar de calidad, o si la estatura está en el rango normal para su edad (5 a 8 años: 1.20 a 1.50). Escala: Excelente/Bueno/Regular/Deficiente o % de cumplimiento.')+
+ qx('diferencia medir y evaluar con ejemplo.')],
+['🔁','SIPOC para crear indicadores',
+ ky('Método para mapear procesos de forma estructurada e identificar puntos críticos de medición. Muy usado en Lean Six Sigma y mejora continua.')+
+ tb(['Letra','Qué define','Indicadores posibles'],[['S – Suppliers','Quién provee insumos','Cumplimiento de entregas, calidad de insumos, tiempos de respuesta'],['I – Inputs','Recursos, materiales, datos','Disponibilidad de insumos, precisión de datos, costos de entrada'],['P – Process','Actividades que transforman','Tiempo de ciclo, eficiencia operativa, tasa de errores'],['O – Outputs','Resultados entregados','Calidad, cumplimiento de especificaciones, tiempos de entrega'],['C – Customers','Usuarios o beneficiarios','Satisfacción, tasa de reclamos, fidelización']])+
+ qx('significado de SIPOC y un indicador por cada letra.')],
+['🧾','Ficha de un indicador',
+ '<div class="exam">ℹ️ El PPT muestra solo el formato de la ficha como imagen (diapositiva 16). Revisa ese formato; idea general: la ficha documenta cada indicador (nombre, objetivo, fórmula, frecuencia, meta, responsable, fuente de datos).</div>']
+]},
+{n:'5.3',name:'Toma de decisiones con benchmarking ponderado',t:[
+['⚖️','Los 6 pasos del método',
+ ky('Se usa el <b>benchmarking</b> para comparar alternativas con criterios de decisión y pesos, y elegir la mejor de forma cuantificada, <b>minimizando la subjetividad</b>.')+
+ ul(['<b>Paso 1:</b> identificar y describir las alternativas.','<b>Paso 2:</b> definir los criterios críticos (de libros, artículos, tesis).','<b>Paso 3:</b> cuadro comparativo simple (benchmarking) alternativas × criterios.','<b>Paso 4:</b> <b>matriz de enfrentamiento</b>: si dos criterios se relacionan se pone 1, si no 0; se suma por fila y el <b>peso = conteo / total de conteos</b>.','<b>Paso 5:</b> puntuar cada alternativa por criterio (1 bajo, 2 bajo-medio, 3 medio, 4 medio-alto, 5 alto) y calcular <b>puntaje × peso</b>.','<b>Paso 6:</b> gana la alternativa con el <b>mayor promedio total</b> (suma de los ponderados).'])+
+ qx('te pueden dar una tabla y pedir calcular pesos y total.')],
+['💻','Ejemplo 1: lenguaje de programación (PHP, Java, Python)',
+ '<b>Criterios:</b> sistemas operativos, propósito, soporte a móviles, consumo de energía (J), tiempo de ejecución (ms), uso máximo de memoria (MB).'+
+ tb(['Criterio','PHP','Java','Python'],[['Soporte a móviles','No tiene','Nativo: Android','No tiene'],['Consumo de energía (J)','29.3','1.98','75.88'],['Tiempo de ejecución (ms)','27.64','1.89','71.9'],['Uso máx. de memoria (MB)','2.57','6.01','2.8']])+
+ tb(['Criterio','Conteo','Peso'],[['A Sistemas operativos','5','23.81%'],['B Propósito','5','23.81%'],['C Soporte a móviles','2','9.52%'],['D Consumo de energía','4','19.05%'],['E Tiempo de ejecución','3','14.29%'],['F Uso de memoria','2','9.52%']])+
+ ex('Promedio total: <b>PHP 3.86 · Java 4.52 · Python 3.05</b>. Decisión: <b>Java</b>. (Ej.: Java en sistemas operativos = 5 × 23.81% = 1.19.)')],
+['☁️','Ejemplo 2: proveedor cloud (AWS, Azure, GCP)',
+ tb(['Criterio','AWS','Azure','GCP'],[['Precio','$0.0924/h','$0.0974/h','$0.0137/h'],['Modelo','Bajo demanda, reservado y en el lugar','Bajo demanda y corto plazo','Bajo demanda y uso sostenido'],['Microservicios','Sí, Service Fabric','Sí, App Engine','No'],['Infraestructura','Sí, AWS Outposts','No','Sí, GKE On-Prem'],['Backup','Sí, Amazon S3 Glacier','Sí, Azure Backup','No']])+
+ tb(['Criterio','Conteo','Peso'],[['A Precio','3','25%'],['B Modelo','4','33.33%'],['C Microservicios','1','8.33%'],['D Infraestructura','2','16.67%'],['E Backup','2','16.67%']])+
+ ex('Promedio total (según el PPT): <b>AWS 4.75 · Azure 3.33 · GCP 3.67</b>. Decisión: <b>AWS</b>.')+
+ sr('Tercer caso del PPT: comparar motores de bases de datos (BD1, BD2, BD3) como práctica individual o en grupo de máximo 3.')]
+]},
+{n:'5.4',name:'Visión de la arquitectura y el Enterprise',t:[
+['🔭','Fase A: Visión de la Arquitectura (TOGAF ADM)',
+ ky('Fase inicial y más crítica del ciclo ADM. Propósito: desarrollar una <b>visión de alto nivel</b> y crear <b>consenso entre stakeholders</b> sobre el valor y los objetivos. El arquitecto trabaja con líderes de negocio y TI para definir alcance, identificar stakeholders y obtener aprobación.')+
+ ul(['Preguntas guía: ¿por qué lo hacemos? ¿qué objetivos de negocio debe apoyar? ¿qué valor estratégico creará?','<b>Entregables clave:</b> Declaración del Trabajo de la Arquitectura y Declaración de Visión de la Arquitectura (el «elevator pitch»).','<b>Teoría:</b> Alineación Estratégica (Henderson & Venkatraman, 1993): el éxito digital depende de alinear TI con la estrategia de negocio.'])+
+ ex('Minorista que pierde cuota por mala experiencia y falta de canal digital. Visión: «Construir una arquitectura omnicanal escalable para una experiencia fluida y personalizada, que aumente la participación de mercado en un 15% en los próximos tres años».')+
+ qx('entregables y propósito de la Fase A.')],
+['🏛️','Enterprise según TOGAF',
+ ky('<b>Enterprise:</b> cualquier colección de organizaciones con un conjunto de <b>objetivos comunes</b>; no se limita a una sola entidad legal (The Open Group, 2018). Base: <b>Teoría de Sistemas</b> (la organización como sistema complejo e interconectado).')+
+ ul(['Puede ser una <b>corporación completa</b>, una <b>división de negocio</b> o una <b>colaboración entre entidades</b> (varias agencias de gobierno).','La AE debe ser un esfuerzo holístico que alinee negocio y TI en todo el sistema.'])+
+ ex('<b>Universidad:</b> visión restringida (no TOGAF) = TI migra el sistema de estudiantes a la nube. Visión TOGAF = el Enterprise es toda la universidad: Facultad (procesos académicos), Admisiones (info de estudiantes) y Finanzas (pagos).')]
+]}]}
+];
+
+const G=[
+['PESTEL','Análisis del macroentorno: político, económico, social, tecnológico, ecológico y legal.'],
+['5 Fuerzas de Porter','Nuevos entrantes, proveedores, compradores, sustitutos y rivalidad.'],
+['Cadena de valor','Actividades que generan valor para el cliente (Porter, 1985); física y virtual.'],
+['Modelo de negocio','Cómo una organización crea, entrega y capta valor (clientes, oferta, infraestructura, viabilidad).'],
+['Canvas','Lienzo de 9 bloques para describir un modelo de negocio.'],
+['BHAG','Objetivo audaz a 10-30 años dentro de una visión.'],
+['Larga cola','Vender menos de más: muchos nichos que suman ingresos grandes.'],
+['Plataforma multilateral','Intermediario entre 2 o más grupos de clientes interdependientes.'],
+['Freemium','Básico gratis; menos del 10% paga premium y subvenciona al resto.'],
+['Cebo y anzuelo','Oferta inicial barata que ata a compras recurrentes de alto margen.'],
+['KPI lagging / leading','Indicador del pasado vs indicador predictivo.'],
+['Balanced Scorecard','Marco que alinea actividades con la visión estratégica.'],
+['VUCA','Entorno volátil, incierto, complejo y ambiguo.'],
+['Transformación digital','Integrar tecnología en todo el negocio con cambio cultural y estratégico.'],
+['SSM / CATWOE','Metodología blanda de Checkland; definición raíz con 6 elementos.'],
+['CSP','Pluralismo metodológico crítico que expone asimetrías de poder (Jackson).'],
+['5W2H','Siete preguntas para estructurar un problema.'],
+['Ishikawa (6M)','Diagrama causa-efecto: mano de obra, métodos, máquinas, materiales, mediciones, medio ambiente.'],
+['Interoperabilidad','Capacidad de compartir información y servicios entre sistemas.'],
+['SIPOC','Proveedores, entradas, proceso, salidas y clientes; base para crear indicadores.'],
+['AS-IS / TO-BE','Situación actual vs situación deseada de la arquitectura.'],
+['Fase A (TOGAF)','Visión de la arquitectura: alcance, stakeholders y consenso de valor.'],
+['Enterprise','Colección de organizaciones con objetivos comunes, según TOGAF.']
+];
+
+const K='cuaderno-arq-negocio-v1';let S={};
+try{S=JSON.parse(localStorage.getItem(K)||'{}')||{}}catch(e){S={}}
+const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let total=0,html='',tabs='';
+D.forEach((s,si)=>{
+ tabs+='<button class="tab" data-s="'+s.id+'">'+s.tab+'<small data-p="'+s.id+'">0%</small></button>';
+ html+='<section class="sec" id="'+s.id+'"><div class="sbar"><div class="bar" style="flex:1"><i data-sb="'+s.id+'"></i></div><span data-st="'+s.id+'"></span></div>';
+ s.cards.forEach((c,ci)=>{
+  html+='<div class="card" data-c="'+s.id+'"><div class="ch"><span class="num">'+c.n+'</span><span class="cn">'+c.name+'</span><span class="cc" data-cc></span><button class="ta">Abrir todo</button></div>';
+  c.t.forEach((t,ti)=>{total++;
+   html+='<div class="row" data-k="'+s.id+'.'+ci+'.'+ti+'"><div class="rh"><span class="em">'+t[0]+'</span><span class="rt">'+t[1]+'</span><input type="checkbox" aria-label="Marcar como repasado"><button class="ar" aria-label="Desplegar">▾</button></div><div class="rb">'+t[2]+'</div></div>';});
+  html+='</div>';});
+ html+='</section>';});
+tabs+='<button class="tab" data-s="gl">⚡ Glosario relámpago</button>';
+html+='<section class="sec" id="gl"><div class="gl">'+G.map(g=>'<div class="g"><b>'+g[0]+'</b>'+g[1]+'</div>').join('')+'</div></section>';
+$('#tabs').innerHTML=tabs;$('#main').innerHTML=html;
+$('#c1').textContent='📚 5 semanas · '+total+' temas + glosario';
+
+function upd(){
+ let done=0;
+ $$('.row').forEach(r=>{const d=!!S[r.dataset.k];r.classList.toggle('done',d);r.querySelector('input').checked=d;if(d)done++;});
+ $$('.card').forEach(c=>{const rs=[...c.querySelectorAll('.row')];c.querySelector('[data-cc]').textContent=rs.filter(r=>r.classList.contains('done')).length+'/'+rs.length;
+  c.querySelector('.ta').textContent=rs.every(r=>r.classList.contains('open'))?'Cerrar':'Abrir todo';});
+ D.forEach(s=>{const rs=$$('#'+s.id+' .row'),n=rs.filter(r=>r.classList.contains('done')).length,p=Math.round(n/rs.length*100);
+  $('[data-p="'+s.id+'"]').textContent=p+'%';$('[data-sb="'+s.id+'"]').style.width=p+'%';$('[data-st="'+s.id+'"]').textContent=n+'/'+rs.length;});
+ const pc=Math.round(done/total*100);
+ $('#pt').textContent=(pc===100?'🎉':pc>=50?'🐤':pc>0?'🐥':'🐣')+' '+done+'/'+total+' temas repasados';
+ $('#pb').style.width=pc+'%';
+}
+function show(id){$$('.sec').forEach(s=>s.classList.toggle('on',s.id===id));$$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.s===id));}
+$('#tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(t)show(t.dataset.s);});
+$('#main').addEventListener('click',e=>{
+ const row=e.target.closest('.row');
+ if(e.target.closest('.ta')){const c=e.target.closest('.card'),rs=[...c.querySelectorAll('.row')],all=rs.every(r=>r.classList.contains('open'));rs.forEach(r=>r.classList.toggle('open',!all));upd();return;}
+ if(!row)return;
+ if(e.target.tagName==='INPUT'){if(e.target.checked)S[row.dataset.k]=1;else delete S[row.dataset.k];sv();upd();return;}
+ if(e.target.closest('.rh')){row.classList.toggle('open');upd();}
+});
+let armed=false;
+$('#rst').addEventListener('click',function(){
+ if(!armed){armed=true;this.textContent='¿Seguro? Toca otra vez';setTimeout(()=>{armed=false;this.textContent='↺ Reiniciar progreso'},3000);return;}
+ S={};sv();armed=false;this.textContent='↺ Reiniciar progreso';upd();
+});
+show('s1');upd();
+</script>
+</body>
+</html>
